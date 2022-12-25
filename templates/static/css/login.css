@@ -1,0 +1,22 @@
+html, body {
+    margin: auto 0
+}
+
+html {
+    background-color: black;
+}
+
+.login {
+    background-color: gray;
+    margin-top: 14%;
+    margin-left: 40%;
+    margin-right: 40%;
+    padding-bottom: 5%;
+    text-align: center;
+}
+
+.actionClickable {
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+}

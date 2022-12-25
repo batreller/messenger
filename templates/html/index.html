@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>messenger</title>
+</head>
+<body>
+
+<script type="text/javascript">
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    // document.cookie = `session=test; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+
+    const session_id = getCookie("session");
+
+    if (session_id === undefined) {
+        window.location.href = "./login"
+    } else {
+        window.location.href = "./chats"
+        // var apiUrl = `/api/validate_token/${session_id}`;
+        // fetch(apiUrl).then(response => {
+        //     return response.json();
+        // }).then(data => {
+        //     const exists = JSON.parse(data)["exists"];
+        //     if (exists === true) {
+        //         window.location.href = "./chats"
+        //     } else {
+        //         window.location.href = "./authorize"
+        //     }
+        // }).catch(err => {
+        //     // Do something for an error here
+        // });
+
+    }
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <link rel="stylesheet" href="{% static 'css/settings.css' %}">
+    <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+</head>
+<body>
+<div class="changeName">
+    <h1>Change Name</h1>
+    <label>
+        <textarea class="newName" id="newName" placeholder="New name"></textarea>
+    </label>
+</div>
+<div class="changeAvatar">
+    <h1>Change avatar</h1>
+    <label>
+        <input type="file"
+               id="avatar" name="avatar"
+               accept="image/png, image/jpeg" oninput="changeAvatar()">
+    </label>
+</div>
+<div id="response" class="response">
+</div>
+<div class="back_button"><h1>BACK</h1><a href="./chats"><img src="{% static 'images/back.jpg' %}" alt="BACK"></a></div>
+
+<script>
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    async function changeAvatar() {
+        const file = document.querySelector('#avatar').files[0];
+        var base64Image = await toBase64(file)
+        console.log(base64Image)
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var jsonResponse = JSON.parse(this.responseText)
+                if (jsonResponse["success"] !== true) {
+                    if (jsonResponse["display_error"] === true) {
+                        document.getElementById("response").innerHTML = jsonResponse["error_text"];
+                    }
+                } else {
+                    document.getElementById("response").innerHTML = jsonResponse["message"];
+                }
+            }
+        };
+        xhttp.open("PATCH", `api/change_avatar`, true);
+        xhttp.send(JSON.stringify({"avatar": base64Image}));
+    }
+
+    function changeName() {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var jsonResponse = JSON.parse(this.responseText)
+                if (jsonResponse["success"] !== true) {
+                    if (jsonResponse["display_error"] === true) {
+                        document.getElementById("response").innerHTML = jsonResponse["error_text"];
+                    }
+                } else {
+                    document.getElementById("response").innerHTML = jsonResponse["message"];
+                }
+            }
+        };
+        xhttp.open("PATCH", `api/change_name`, true);
+        xhttp.send(JSON.stringify({"name": document.getElementById("newName").value}));
+    }
+
+    $("#newName").keypress(function (e) {
+        if (e.which === 13 && !e.shiftKey) {
+            e.preventDefault();
+            console.log("asd")
+            changeName();
+        }
+    });
+</script>
+</body>
+</html>

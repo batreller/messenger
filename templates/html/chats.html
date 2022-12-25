@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'css/chats.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+</head>
+<body>
+<script>
+    const timer = ms => new Promise(res => setTimeout(res, ms))
+    var renewChatsEnabled = true
+    let current_chat_data = [];
+    const myId = getCookie("user_id");
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function openChat(sender, receiver) {
+        renewChatsEnabled = true
+        var old_data = current_chat_data
+        current_chat_data = [sender, receiver]
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                jsonResponse = JSON.parse(this.responseText);
+                if (jsonResponse['success'] === false) {
+                    if (jsonResponse['display_error'] === true) {
+                        window.location.href = "./login"
+                    }
+                } else {
+                    // all is good
+                    document.getElementById("current_chat").innerHTML = "";
+                    var jsonResponse = JSON.parse(this.responseText)
+                    for (let i = 0; i < jsonResponse["messages"].length; i++) {
+                        var message = document.createElement("div");
+                        if (parseInt(getCookie("user_id")) === jsonResponse["messages"][i][2]) {
+                            // message from you
+                            message.className = "right_message"
+                        } else {
+                            // message not from you
+                            message.className = "left_message"
+                        }
+                        message.innerHTML = `${jsonResponse["messages"][i][1]}`;
+                        document.getElementById("current_chat").appendChild(message);
+                    }
+
+                    if (current_chat_data[0] !== old_data[0] || current_chat_data[1] !== old_data[1]) {
+                        const current_chat = document.getElementById("current_chat");
+                        current_chat.scrollTop = current_chat.scrollHeight;
+                    }
+
+
+                }
+            }
+        };
+        xhttp.open("GET", `api/get_users_chats?user_1=${sender}&user_2=${receiver}`, true);
+        xhttp.send();
+    }
+
+    function renewChats() {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var jsonResponse = JSON.parse(this.responseText)
+                document.getElementById("chats").innerHTML = "";
+                for (let i = 0; i < jsonResponse["chats"].length; i++) {
+                    var chat = document.createElement("div");
+                    chat.className = "chat"
+                    // div.onclick = function(){openChat(jsonResponse["chats"][i][2], jsonResponse["chats"][i][3])};
+                    // div.addEventListener("click", );
+                    chat.setAttribute("onclick", `openChat(${jsonResponse['chats'][i][2]}, ${jsonResponse['chats'][i][3]});`);
+
+                    // div.onclick("test()")
+                    if (parseInt(getCookie("user_id")) === jsonResponse["chats"][i][2]) {
+                        // show receiver
+                        chat.innerHTML = `<div class="avatar"><img style="width: 100px; height: 100px" src="${jsonResponse["chats"][i][8]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][6]}</h3></div></div>`;
+                    } else {
+                        // show sender
+                        chat.innerHTML = `<div class="avatar"><img src="${jsonResponse["chats"][i][7]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][5]}</h3></div></div>`;
+                    }
+
+                    document.getElementById("chats").appendChild(chat);
+                }
+            }
+        };
+        xhttp.open("GET", `api/chats`, true);
+        xhttp.send();
+    }
+
+    function sendMessage() {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var jsonResponse = JSON.parse(this.responseText)
+            }
+        };
+        xhttp.open("POST", `api/message`, true);
+        if (parseInt(myId) === current_chat_data[0]) {
+            xhttp.send(JSON.stringify({
+                text: document.getElementById("messageToSend").value,
+                receiver: current_chat_data[1]
+            }));
+
+        } else {
+            xhttp.send(JSON.stringify({
+                text: document.getElementById("messageToSend").value,
+                receiver: current_chat_data[0]
+            }));
+
+        }
+        document.getElementById("messageToSend").value = "";
+        const current_chat = document.getElementById("current_chat");
+        current_chat.scrollTop = current_chat.scrollHeight;
+    }
+
+    function searchUsers() {
+        renewChatsEnabled = false
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var jsonResponse = JSON.parse(this.responseText)
+                document.getElementById("chats").innerHTML = "";
+                for (let i = 0; i < jsonResponse["users"].length; i++) {
+                    var chat = document.createElement("div");
+                    chat.className = "chat"
+                    // div.onclick = function(){openChat(jsonResponse["chats"][i][2], jsonResponse["chats"][i][3])};
+                    // div.addEventListener("click", );
+                    chat.setAttribute("onclick", `openChat(${myId}, ${jsonResponse['users'][i][0]});`);
+
+                    // div.onclick("test()")
+                    chat.innerHTML = `<div class="avatar"><img src="${jsonResponse["users"][i][2]}" alt="avatar"/></div><div class="text"><p style="font-size: 70%">FROM SEARCH</p><h3>${jsonResponse["users"][i][1]}</h3></div></div>`;
+
+                    document.getElementById("chats").appendChild(chat);
+                }
+            }
+        };
+        xhttp.open("GET", `api/all_users?search=${document.getElementById("user_search").value}`, true);
+        xhttp.send();
+    }
+
+    async function chatRenewer() {
+        while (true) {
+            if (current_chat_data.length > 1) {
+                openChat(current_chat_data[0], current_chat_data[1])
+            }
+            await timer(500);
+        }
+    }
+
+    async function chatsRenewer() {
+        while (true) {
+            if (renewChatsEnabled === true) {
+                renewChats()
+            }
+            await timer(3000);
+        }
+    }
+
+    chatsRenewer();
+    chatRenewer();
+    renewChats()
+
+    $(document).keyup(function (e) {
+        if (e.key === "Escape") {
+            renewChatsEnabled = true
+            renewChats()
+        }
+    });
+
+</script>
+<form onsubmit="searchUsers(); return false;">
+    <label>
+        <textarea id="user_search" class="user_search" style="height: 50px; width: 450px;"></textarea>
+    </label>
+</form>
+
+{#<div class="user_search"></div>#}
+<div class="chats" id="chats"></div>
+<div class="chats_together">
+    <div class="current_chat" id="current_chat"><h1 style="text-align: center; margin-top: 30%">NO CHAT SELECTED</h1>
+    </div>
+    <div class="message_sender" id="message_sender">
+        <label>
+            <textarea id="messageToSend" style="height: 70px; width: 700px;"></textarea>
+        </label>
+        {#        <button type="button" onclick="sendMessage()">Send</button>#}
+    </div>
+</div>
+<a href="./settings">
+    <div class="settings_button">SETTINGS<img src="{% static 'images/settings.jpg' %}" alt="SETTINGS"></div>
+</a>
+
+</body>
+
+<script>
+    $("#user_search").keypress(function (e) {
+        if (e.which === 13 && !e.shiftKey) {
+            e.preventDefault();
+
+            $(this).closest("form").submit();
+        }
+    });
+    $("#messageToSend").keypress(function (e) {
+        if (e.which === 13 && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage()
+        }
+    });
+
+</script>
+</html>
