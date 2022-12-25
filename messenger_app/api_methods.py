@@ -41,7 +41,7 @@ def send_message(request) -> JsonResponse:
             return JsonResponse(status=400, data={"success": False, "display_error": True,
                                                   "error_text": "Receiver does not exists"})
 
-        database.send_message(data["text"], user[0], data["receiver"])
+        database.send_message(text, user[0], receiver[0])
         return JsonResponse(status=200, data={"success": True})
 
     except json.decoder.JSONDecodeError:
@@ -276,4 +276,4 @@ def safe_string(text: Union[str, int]) -> Union[int, str, None]:
     if type(text) == int:
         return text
 
-    return text.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
