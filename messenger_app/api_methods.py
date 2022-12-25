@@ -22,7 +22,7 @@ def send_message(request) -> JsonResponse:
 
         data = json.loads(request.body.decode('utf-8'))
         receiver = data.get("receiver")
-        receiver = safe_string(token)
+        receiver = safe_string(receiver)
 
         text = data.get("text")
         text = safe_string(text)
@@ -177,7 +177,6 @@ def get_all_users(request) -> JsonResponse:
         token = safe_string(token)
 
         search_filter = request.GET.get("search")
-        search_filter = safe_string(search_filter)
 
         user = database.get_user_by_token(token)
 
