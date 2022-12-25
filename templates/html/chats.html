@@ -70,6 +70,9 @@
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState === 4) {
+                if (this.status === 401) {
+                    window.location.href = "./login"
+                }
                 var jsonResponse = JSON.parse(this.responseText)
                 document.getElementById("chats").innerHTML = "";
                 for (let i = 0; i < jsonResponse["chats"].length; i++) {
@@ -100,6 +103,10 @@
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState === 4) {
+                if (this.status === 401) {
+                    window.location.href = "./login"
+                }
+
                 var jsonResponse = JSON.parse(this.responseText)
             }
         };
@@ -127,6 +134,9 @@
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState === 4) {
+                if (this.status === 401) {
+                    window.location.href = "./login"
+                }
                 var jsonResponse = JSON.parse(this.responseText)
                 document.getElementById("chats").innerHTML = "";
                 for (let i = 0; i < jsonResponse["users"].length; i++) {

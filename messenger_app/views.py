@@ -58,3 +58,7 @@ def change_avatar(request):
 @csrf_exempt
 def change_name(request):
     return api_methods.change_name(request)
+
+@csrf_exempt
+def api_export(request):
+    return api_methods.api_export(request)

@@ -18,4 +18,5 @@ urlpatterns = [
     path('api/all_users', views.api_all_users),
     path('api/change_name', views.change_name),
     path('api/change_avatar', views.change_avatar),
+    path('api/export', views.api_export),
 ]

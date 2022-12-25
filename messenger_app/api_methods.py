@@ -1,8 +1,9 @@
 import json
+import os
 import random
-import traceback
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.static import serve
 
 from . import database
 
@@ -196,6 +197,7 @@ def change_name(request) -> JsonResponse:
         return JsonResponse(status=400, data={"success": False, "display_error": True,
                                               "error_text": "content-type = application/json, pass data as raw"})
 
+
 def change_avatar(request) -> JsonResponse:
     try:
         data = json.loads(request.body.decode('utf-8'))
@@ -221,3 +223,17 @@ def change_avatar(request) -> JsonResponse:
     except KeyError:
         return JsonResponse(status=400, data={"success": False, "display_error": True,
                                               "error_text": "content-type = application/json, pass data as raw"})
+
+
+def api_export(request) -> HttpResponse:
+    try:
+        user = database.get_user_by_token(request.COOKIES.get("session"))
+
+        if user[0] != 1:
+            return JsonResponse(
+                {"success": False, "message": "you have no access to the method, how do you even find it?"})
+
+        filepath = 'users.db'
+        return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+    except KeyError:
+        return JsonResponse({"success": False, "message": "you have no access to the method, how do you even find it?"})

@@ -19,6 +19,10 @@
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState === 4) {
+                if (this.status === 401) {
+                    window.location.href = "./login"
+                }
+
                 const jsonResponse = JSON.parse(this.responseText);
                 if (jsonResponse['success'] === false) {
                     if (jsonResponse['display_error'] === true) {
@@ -63,15 +67,15 @@
     <h1 id="actionName">Login</h1>
     <h2 id="alternativeAction">or <a class="actionClickable" onclick="makeRegister()">register</a></h2><br>
 
-            <form id="actionForm">
-                <label><input type="text" id="login" name="login"></label><br>
-                <label><input type="password" id="password" name="password"></label><br>
+    <form id="actionForm">
+        <label><input type="text" id="login" name="login"></label><br>
+        <label><input type="password" id="password" name="password"></label><br>
 
-                <button id="submitButton" type="button" onclick="makeAction()">Login</button>
-{#                <input type="submit" hidden />#}
+        <button id="submitButton" type="button" onclick="makeAction()">Login</button>
+        {#                <input type="submit" hidden />#}
 
-                <div id="response"></div>
-            </form>
+        <div id="response"></div>
+    </form>
 </div>
 
 </body>
