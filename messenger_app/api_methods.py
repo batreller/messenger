@@ -1,7 +1,6 @@
 import json
 import os
 import random
-import traceback
 
 from django.http import JsonResponse, HttpResponse
 from django.views.static import serve
@@ -64,8 +63,7 @@ def get_chats(request) -> JsonResponse:
     except KeyError:
         return JsonResponse(status=400, data={"success": False, "display_error": True,
                                               "error_text": "cookie can not be null"})
-    except:
-        return JsonResponse(status=400, data={"error": "FATAL", "error_text": traceback.format_exc()})
+
 
 def get_users_chats(request) -> JsonResponse:
     try:

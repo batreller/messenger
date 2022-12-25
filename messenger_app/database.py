@@ -53,9 +53,12 @@ def get_chats_by_id(id: str) -> list:
     cur.execute("SELECT max(id), text, sender, receiver, timestamp FROM messages WHERE sender=? OR receiver=? GROUP BY sender, receiver ORDER BY id DESC;", (id, id,))
     chats = cur.fetchall()
     done = set()
+    minuser = 0
     for chat_index in range(len(chats)):
+        chat_index -= minuser
         if (str(chats[chat_index][3]) + "|" + str(chats[chat_index][2])) in done:
             chats.pop(chat_index)
+            minuser += 1
             continue
         done.add(str(chats[chat_index][2]) + "|" + str(chats[chat_index][3]))
         sender = get_user_by_id(chats[chat_index][2])
