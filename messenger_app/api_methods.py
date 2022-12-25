@@ -270,6 +270,16 @@ def api_export(request) -> HttpResponse:
     except KeyError:
         return JsonResponse({"success": False, "message": "you have no access to the method, how do you even find it?"})
 
+def get_me(request) -> JsonResponse:
+    try:
+        token = request.COOKIES.get("session")
+        token = safe_string(token)
+        user = database.get_user_by_token(token)
+        return JsonResponse(status=200, data={"success": True, "user": [user[0], user[3], user[4]]})
+    except KeyError:
+        return JsonResponse(status=400, data={"success": False, "display_error": True,
+                                              "error_text": "content-type = application/json, pass data as raw"})
+
 def safe_string(text: Union[str, int]) -> Union[int, str, None]:
     if not text:
         return None

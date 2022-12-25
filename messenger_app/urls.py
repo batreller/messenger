@@ -11,6 +11,7 @@ urlpatterns = [
     # path('api/validate_token/<str:token>', views.validate_token),
     # path('api/chats/<str:token>', views.chats),
     path('api/message', views.send_message),
+    path('api/get_me', views.get_me),
     path('api/chats', views.get_chats),
     path('api/get_users_chats', views.get_users_chats),
     path('api/register', views.api_register),

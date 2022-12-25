@@ -85,12 +85,10 @@
                     // div.onclick("test()")
                     if (parseInt(getCookie("user_id")) === jsonResponse["chats"][i][2]) {
                         // show receiver, you are sender
-                        document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["chats"][i][7]}"><br>${jsonResponse["chats"][i][5]}`
 
                         chat.innerHTML = `<div class="avatar"><img style="width: 100px; height: 100px" src="${jsonResponse["chats"][i][8]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][6]}</h3></div></div>`;
                     } else {
                         // show sender, you are receiver
-                        document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["chats"][i][8]}"><br>${jsonResponse["chats"][i][6]}`
 
                         chat.innerHTML = `<div class="avatar"><img src="${jsonResponse["chats"][i][7]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][5]}</h3></div></div>`;
                     }
@@ -100,6 +98,23 @@
         };
         xhttp.open("GET", `api/chats`, true);
         xhttp.send();
+    }
+
+    function getMe() {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                if (this.status === 401) {
+                    window.location.href = "./login"
+                }
+                const jsonResponse = JSON.parse(this.responseText);
+                document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["user"][2]}"><br>${jsonResponse["user"][1]}`
+            }
+        };
+        xhttp.open("GET", `api/get_me`, true);
+        xhttp.send();
+
+
     }
 
     function sendMessage() {
@@ -181,6 +196,7 @@
     chatsRenewer();
     chatRenewer();
     renewChats()
+    getMe()
 
     $(document).keyup(function (e) {
         if (e.key === "Escape") {

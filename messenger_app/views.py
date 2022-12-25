@@ -32,6 +32,10 @@ def send_message(request):
     return api_methods.send_message(request)
 
 @csrf_exempt
+def get_me(request):
+    return api_methods.get_me(request)
+
+@csrf_exempt
 def get_chats(request):
     return api_methods.get_chats(request)
 
