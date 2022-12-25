@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from typing import Union
 
 from django.http import JsonResponse, HttpResponse
 from django.views.static import serve
@@ -17,9 +18,15 @@ from . import database
 def send_message(request) -> JsonResponse:
     try:
         token = request.COOKIES.get("session")
+        token = safe_string(token)
+
         data = json.loads(request.body.decode('utf-8'))
         receiver = data.get("receiver")
+        receiver = safe_string(token)
+
         text = data.get("text")
+        text = safe_string(text)
+
 
         if not text or not receiver or not token:
             return JsonResponse(status=400, data={"success": False, "display_error": True,
@@ -48,6 +55,7 @@ def send_message(request) -> JsonResponse:
 def get_chats(request) -> JsonResponse:
     try:
         token = request.COOKIES.get("session")
+        token = safe_string(token)
 
         user = database.get_user_by_token(token)
         if not user:
@@ -68,10 +76,16 @@ def get_chats(request) -> JsonResponse:
 def get_users_chats(request) -> JsonResponse:
     try:
         token = request.COOKIES.get("session")
+        token = safe_string(token)
+
         user = database.get_user_by_token(token)
-        print(user)
+
         user_1 = int(request.GET.get("user_1"))
+        user_1 = safe_string(user_1)
+
         user_2 = int(request.GET.get("user_2"))
+        user_2 = safe_string(user_2)
+
         if user[0] != user_1 and user[0] != user_2:
             return JsonResponse(status=401,
                                 data={"success": False, "display_error": True,
@@ -100,7 +114,10 @@ def register(request) -> JsonResponse:
     try:
         data = json.loads(request.body.decode('utf-8'))
         login = data.get("login")
+        login = safe_string(login)
+
         password = data.get("password")
+        password = safe_string(password)
 
         user = database.get_user_by_login(login)
         if user:
@@ -128,7 +145,11 @@ def register(request) -> JsonResponse:
 def login(request) -> JsonResponse:
     try:
         login = request.GET.get("login")
+        login = safe_string(login)
+
         password = request.GET.get("password")
+        password = safe_string(password)
+
 
         user = database.get_user_by_login(login)
         if not user:
@@ -153,7 +174,11 @@ def login(request) -> JsonResponse:
 def get_all_users(request) -> JsonResponse:
     try:
         token = request.COOKIES.get("session")
+        token = safe_string(token)
+
         search_filter = request.GET.get("search")
+        search_filter = safe_string(search_filter)
+
         user = database.get_user_by_token(token)
 
         if not user:
@@ -175,8 +200,11 @@ def change_name(request) -> JsonResponse:
     try:
         data = json.loads(request.body.decode('utf-8'))
         name = data.get("name")
+        name = safe_string(name)
 
         token = request.COOKIES.get("session")
+        token = safe_string(token)
+
         user = database.get_user_by_token(token)
 
         if not user:
@@ -202,8 +230,11 @@ def change_avatar(request) -> JsonResponse:
     try:
         data = json.loads(request.body.decode('utf-8'))
         avatar = data.get("avatar")
+        avatar = safe_string(avatar)
 
         token = request.COOKIES.get("session")
+        token = safe_string(token)
+
         user = database.get_user_by_token(token)
 
         if not user:
@@ -227,7 +258,9 @@ def change_avatar(request) -> JsonResponse:
 
 def api_export(request) -> HttpResponse:
     try:
-        user = database.get_user_by_token(request.COOKIES.get("session"))
+        token = request.COOKIES.get("session")
+        token = safe_string(token)
+        user = database.get_user_by_token(token)
 
         if not user or user[0] != 1:
             return JsonResponse(
@@ -237,3 +270,11 @@ def api_export(request) -> HttpResponse:
         return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
     except KeyError:
         return JsonResponse({"success": False, "message": "you have no access to the method, how do you even find it?"})
+
+def safe_string(text: Union[str, int]) -> Union[int, str, None]:
+    if not text:
+        return None
+    if type(text) == int:
+        return text
+
+    return text.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
