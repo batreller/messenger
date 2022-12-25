@@ -229,7 +229,7 @@ def api_export(request) -> HttpResponse:
     try:
         user = database.get_user_by_token(request.COOKIES.get("session"))
 
-        if user[0] != 1:
+        if not user or user[0] != 1:
             return JsonResponse(
                 {"success": False, "message": "you have no access to the method, how do you even find it?"})
 
