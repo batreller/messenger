@@ -90,7 +90,8 @@
                         chat.innerHTML = `<div class="avatar"><img style="width: 100px; height: 100px" src="${jsonResponse["chats"][i][8]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][6]}</h3></div></div>`;
                     } else {
                         // show sender, you are receiver
-                        document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["chats"][i][6]}"><br>${jsonResponse["chats"][i][6]}`
+                        document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["chats"][i][8]}"><br>${jsonResponse["chats"][i][6]}`
+
                         chat.innerHTML = `<div class="avatar"><img src="${jsonResponse["chats"][i][7]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][5]}</h3></div></div>`;
                     }
                     document.getElementById("chats").appendChild(chat);
