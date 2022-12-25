@@ -84,13 +84,15 @@
 
                     // div.onclick("test()")
                     if (parseInt(getCookie("user_id")) === jsonResponse["chats"][i][2]) {
-                        // show receiver
+                        // show receiver, you are sender
+                        document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["chats"][i][7]}"><br>${jsonResponse["chats"][i][5]}`
+
                         chat.innerHTML = `<div class="avatar"><img style="width: 100px; height: 100px" src="${jsonResponse["chats"][i][8]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][6]}</h3></div></div>`;
                     } else {
-                        // show sender
+                        // show sender, you are receiver
+                        document.getElementById("myProfile").innerHTML = `<img alt="your avatar" src="${jsonResponse["chats"][i][6]}"><br>${jsonResponse["chats"][i][6]}`
                         chat.innerHTML = `<div class="avatar"><img src="${jsonResponse["chats"][i][7]}" alt="avatar"/></div><div class="text"><h3>${jsonResponse["chats"][i][5]}</h3></div></div>`;
                     }
-
                     document.getElementById("chats").appendChild(chat);
                 }
             }
@@ -206,6 +208,8 @@
     </div>
 </div>
 <a href="./settings">
+    {#    <img src=""><br>TEST#}
+    <div id="myProfile" class="myProfile"></div>
     <div class="settings_button">SETTINGS<img src="{% static 'images/settings.jpg' %}" alt="SETTINGS"></div>
 </a>
 
