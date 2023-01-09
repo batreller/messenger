@@ -47,6 +47,7 @@ else:
 
 INSTALLED_APPS = [
     'channels',
+    'corsheaders',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,6 +61,9 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'messenger.asgi.application'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

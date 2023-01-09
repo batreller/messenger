@@ -57,8 +57,6 @@ def send_message(text: str, sender: str, receiver: int) -> bool:
 
 
 def get_chats_by_id(id: str) -> list:
-    get_related_users(id)
-
     cur = conn.cursor()
     cur.execute(
         "SELECT max(id), text, sender, receiver, timestamp FROM messages WHERE sender=? OR receiver=? GROUP BY sender, receiver ORDER BY id DESC;",
