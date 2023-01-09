@@ -6,13 +6,14 @@ from typing import Union
 from django.http import JsonResponse, HttpResponse
 from django.views.static import serve
 
-from . import database
+from . import database, ws_methods
 
 
 # def validate_token(token: str) -> JsonResponse:
 #     if database.get_user_by_token(token):
 #         return JsonResponse(status=200, data={"exists": True})
 #     return JsonResponse(status=200, data={"exists": False})
+from .data import users
 
 
 def send_message(request) -> JsonResponse:
@@ -26,7 +27,6 @@ def send_message(request) -> JsonResponse:
 
         text = data.get("text")
         text = safe_string(text)
-
 
         if not text or not receiver or not token:
             return JsonResponse(status=400, data={"success": False, "display_error": True,
@@ -42,6 +42,16 @@ def send_message(request) -> JsonResponse:
                                                   "error_text": "Receiver does not exists"})
 
         database.send_message(text, user[0], receiver[0])
+
+        user_connection = users.get(receiver[0])
+        if user_connection:
+            json_message = {
+                "action": "NEW_MESSAGE",
+                "from_user_id": user[0],
+                "text": text
+            }
+            user_connection.send(text_data=json.dumps(json_message))
+
         return JsonResponse(status=200, data={"success": True})
 
     except json.decoder.JSONDecodeError:
@@ -150,7 +160,6 @@ def login(request) -> JsonResponse:
         password = request.GET.get("password")
         password = safe_string(password)
 
-
         user = database.get_user_by_login(login)
         if not user:
             return JsonResponse(status=200,
@@ -161,7 +170,7 @@ def login(request) -> JsonResponse:
                                                   "error_text": "login and password can not be blank, you should send request as {\"login\": \"login\", \"password\": \"password\"}"})
 
         user = database.get_user_by_login(login)
-        return JsonResponse(status=200, data={"success": True, "token": user[5], "user_id": user[0]})
+        return JsonResponse(status=200, data={"success": True, "token": user[6], "user_id": user[0]})
 
     except json.decoder.JSONDecodeError:
         return JsonResponse(status=400, data={"success": False, "display_error": True,
@@ -215,6 +224,17 @@ def change_name(request) -> JsonResponse:
                                       "error_text": "You should pass \"name\" param"})
 
         database.set_name(user[0], name)
+
+        related_users = ws_methods.get_related_users(user[0])
+
+        json_message = {
+            "action": "USER_CHANGED_NAME",
+            "user_id": user[0],
+            "new_name": name,
+            "message": "user change his name"
+        }
+        ws_methods.send_message_to_users(related_users, json_message)
+
         return JsonResponse(status=200, data={"success": True, "message": "Name successfully changed"})
 
     except json.decoder.JSONDecodeError:
@@ -245,6 +265,16 @@ def change_avatar(request) -> JsonResponse:
                                       "error_text": "You should pass \"avatar\" param the value is base64 image"})
 
         database.set_avatar(user[0], avatar)
+        related_users = ws_methods.get_related_users(user[0])
+
+        json_message = {
+            "action": "USER_CHANGED_AVATAR",
+            "user_id": user[0],
+            "new_avatar": avatar,
+            "message": "user change his avatar"
+        }
+        ws_methods.send_message_to_users(related_users, json_message)
+
         return JsonResponse(status=200, data={"success": True, "message": "Avatar successfully changed"})
 
     except json.decoder.JSONDecodeError:
@@ -270,15 +300,17 @@ def api_export(request) -> HttpResponse:
     except KeyError:
         return JsonResponse({"success": False, "message": "you have no access to the method, how do you even find it?"})
 
+
 def get_me(request) -> JsonResponse:
     try:
         token = request.COOKIES.get("session")
         token = safe_string(token)
         user = database.get_user_by_token(token)
-        return JsonResponse(status=200, data={"success": True, "user": [user[0], user[3], user[4]]})
+        return JsonResponse(status=200, data={"success": True, "user": [user[0], user[3], user[5], user[4]]})
     except KeyError:
         return JsonResponse(status=400, data={"success": False, "display_error": True,
                                               "error_text": "content-type = application/json, pass data as raw"})
+
 
 def safe_string(text: Union[str, int]) -> Union[int, str, None]:
     if not text:

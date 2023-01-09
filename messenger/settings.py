@@ -46,6 +46,8 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,6 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'messenger_app.apps.MessengerAppConfig',
 ]
+
+ASGI_APPLICATION = 'messenger.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
