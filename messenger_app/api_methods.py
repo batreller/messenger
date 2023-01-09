@@ -306,6 +306,10 @@ def get_me(request) -> JsonResponse:
         token = request.COOKIES.get("session")
         token = safe_string(token)
         user = database.get_user_by_token(token)
+        if not user:
+            return JsonResponse(status=401, data={"success": False, "display_error": True,
+                                                  "error_text": "Invalid token"})
+
         return JsonResponse(status=200, data={"success": True, "user": [user[0], user[3], user[5], user[4]]})
     except KeyError:
         return JsonResponse(status=400, data={"success": False, "display_error": True,
