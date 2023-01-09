@@ -3,4 +3,3 @@ pathlib~=1.0.1
 gunicorn
 whitenoise
 channels
-django-cors-headers
