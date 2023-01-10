@@ -1,6 +1,6 @@
 import json
-import threading
 import traceback
+from threading import Thread
 
 from channels.generic.websocket import WebsocketConsumer
 
@@ -52,12 +52,8 @@ class ChatConsumer(WebsocketConsumer):
             self.verified = True
             self.user_token = user_token
             self.user_id = user[0]
-            # users[self]["verified"] = True
-            # users[self]["user_token"] = user_token
-            # users[self]["user_id"] = user[0]
             users[user[0]] = self
             ws_methods.change_online(True, self.user_id)
-            related_users = ws_methods.get_related_users(user[0])
 
             json_message = {
                 "action": "ACTIVITY_UPDATE",
@@ -65,19 +61,10 @@ class ChatConsumer(WebsocketConsumer):
                 "is_online": True,
                 "message": "user change his activity status"
             }
-            ws_methods.send_message_to_users(related_users, json_message)
+            ws_methods.spam_related_users(user[0], json_message)
 
     def disconnect(self, code):
-        ws_methods.change_online(True, self.user_id)
-        related_users = ws_methods.get_related_users(self.user_id)
-
-        json_message = {
-            "action": "ACTIVITY_UPDATE",
-            "user_id": self.user_id,
-            "is_online": False,
-            "message": "user change his activity status"
-        }
-        ws_methods.send_message_to_users(related_users, json_message)
+        Thread(target=ws_methods.change_online, args=(True, self.user_id,)).start()
 
         print(self, code, 'disconnected')
         # delete users[user_id]

@@ -2,7 +2,7 @@ import json
 import os
 import random
 from typing import Union
-
+from threading import Thread
 from django.http import JsonResponse, HttpResponse
 from django.views.static import serve
 
@@ -225,15 +225,14 @@ def change_name(request) -> JsonResponse:
 
         database.set_name(user[0], name)
 
-        related_users = ws_methods.get_related_users(user[0])
-
         json_message = {
             "action": "USER_CHANGED_NAME",
             "user_id": user[0],
             "new_name": name,
             "message": "user change his name"
         }
-        ws_methods.send_message_to_users(related_users, json_message)
+
+        Thread(target=ws_methods.spam_related_users, args=(user[0], json_message,)).start()
 
         return JsonResponse(status=200, data={"success": True, "message": "Name successfully changed"})
 
@@ -265,7 +264,6 @@ def change_avatar(request) -> JsonResponse:
                                       "error_text": "You should pass \"avatar\" param the value is base64 image"})
 
         database.set_avatar(user[0], avatar)
-        related_users = ws_methods.get_related_users(user[0])
 
         json_message = {
             "action": "USER_CHANGED_AVATAR",
@@ -273,7 +271,8 @@ def change_avatar(request) -> JsonResponse:
             "new_avatar": avatar,
             "message": "user change his avatar"
         }
-        ws_methods.send_message_to_users(related_users, json_message)
+
+        Thread(target=ws_methods.spam_related_users, args=(user[0], json_message,)).start()
 
         return JsonResponse(status=200, data={"success": True, "message": "Avatar successfully changed"})
 

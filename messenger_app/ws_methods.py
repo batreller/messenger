@@ -25,9 +25,21 @@ def send_message_to_users(users_list: list[int], json_message: dict) -> None:
             user_connection.send(text_data=json.dumps(json_message))
 
 
+def spam_related_users(related_to_user_id: int, json_message: dict) -> None:
+    related_users = get_related_users(related_to_user_id)
+    send_message_to_users(related_users, json_message)
+
+
 def change_online(status: bool, user_id: int) -> None:
     database.change_online(status, user_id)
-    # todo spam related users
+
+    json_message = {
+        "action": "ACTIVITY_UPDATE",
+        "user_id": user_id,
+        "is_online": False,
+        "message": "user change his activity status"
+    }
+    spam_related_users(user_id, json_message)
 
 
 def safe_string(text: Union[str, int]) -> Union[int, str, None]:
